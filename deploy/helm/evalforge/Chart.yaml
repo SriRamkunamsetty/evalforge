@@ -1,0 +1,9 @@
+apiVersion: v2
+name: evalforge
+description: Human-in-the-loop LLM evaluation platform with rater QA and preference export
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+maintainers:
+  - name: SriRamKunamsetty
+    email: mohansriramkunamsetty@gmail.com

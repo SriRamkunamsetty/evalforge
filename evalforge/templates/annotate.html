@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block title %}{% if not rater %}Choose a rater{% elif not task %}All done{% else %}Task {{ done + 1 }} of {{ total }}{% endif %} · EvalForge{% endblock %}{% block body %}
+{% if not rater %}<h1>Start annotating</h1><p class="sub">Enter a rater name (letters, digits, <code>_ . -</code>).</p>
+<form method="post" action="/session"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<label class="fl" for="rater">Rater name</label>
+<input type="text" id="rater" name="rater" maxlength="40" pattern="[A-Za-z0-9_.\-]{1,40}" required autocomplete="username">
+<p><button class="btn" type="submit">Continue</button></p></form>
+{% elif not task %}<h1>All done, {{ rater }}</h1><p class="sub">You have annotated all {{ total }} tasks. Thank you!</p>
+<form method="post" action="/session/end"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn" type="submit">Switch rater</button></form>
+{% else %}<h1>Compare two responses</h1><p class="sub">Rater <strong>{{ rater }}</strong> · task {{ done + 1 }} of {{ total }} · model names are hidden and positions are randomised.</p>
+<div class="card"><div class="l">Prompt</div><p>{{ task.prompt }}</p></div>
+<form method="post" action="/annotate"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><input type="hidden" name="task_id" value="{{ task.id }}">
+<div class="pair"><section class="resp" aria-labelledby="r1"><h2 id="r1">Response 1</h2><p>{{ task.first }}</p></section>
+<section class="resp" aria-labelledby="r2"><h2 id="r2">Response 2</h2><p>{{ task.second }}</p></section></div>
+<fieldset><legend>Which response is better?</legend>
+<label class="opt"><input type="radio" name="choice" value="first" required> Response 1</label>
+<label class="opt"><input type="radio" name="choice" value="second"> Response 2</label>
+<label class="opt"><input type="radio" name="choice" value="tie"> Tie</label></fieldset>
+<fieldset><legend>Problems in the response you did not prefer (optional)</legend>
+{% for key, label in issues.items() %}<label class="opt"><input type="checkbox" name="issues" value="{{ key }}"> {{ label }}</label>{% endfor %}</fieldset>
+<label class="fl" for="note">Justification (optional)</label>
+<input type="text" id="note" name="note" maxlength="1000">
+<p><button class="btn" type="submit">Submit and continue</button></p></form>{% endif %}{% endblock %}

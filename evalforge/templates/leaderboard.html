@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Leaderboard · EvalForge{% endblock %}{% block body %}
+<h1>Leaderboard</h1><p class="sub">Bradley-Terry strengths fitted on consensus winners (majority of non-tie votes, ≥2 votes), shown on an Elo-like scale. Issues are tags raters attached to the response they did not prefer.</p>
+<div class="scroll" role="region" tabindex="0" aria-label="Model leaderboard"><table><caption class="sr">Models ranked by consensus strength</caption>
+<thead><tr><th scope="col">#</th><th scope="col">Model</th><th scope="col">Strength</th><th scope="col">Elo-scale</th><th scope="col">Wins / battles</th><th scope="col">Issues against</th><th scope="col">Top issue</th></tr></thead><tbody>
+{% for m in a.board %}<tr><td>{{ loop.index }}</td><th scope="row">{{ m.model }}</th>
+<td><progress value="{{ (m.strength / a.board[0].strength * 100)|round|int }}" max="100" aria-label="Relative strength of {{ m.model }}"></progress>{{ '%.2f' % m.strength }}</td>
+<td>{{ '%.0f' % m.elo }}</td><td>{{ m.wins }} / {{ m.battles }}</td><td>{{ m.issues }}</td><td>{{ m.top_issue }}</td></tr>
+{% else %}<tr><td colspan="7" class="mut">No consensus battles yet.</td></tr>{% endfor %}</tbody></table></div>
+<p class="mut">Export preference data: <code>GET /api/export/dpo</code> (API key required).</p>{% endblock %}

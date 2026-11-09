@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}Raters · EvalForge{% endblock %}{% block body %}
+<h1>Rater quality</h1><p class="sub">Gold-question accuracy and pairwise Cohen's κ (pairs with ≥5 shared tasks). Raters under 70% on ≥3 gold tasks are flagged.</p>
+<div class="scroll" role="region" tabindex="0" aria-label="Rater accuracy"><table><caption class="sr">Rater accuracy on gold questions</caption>
+<thead><tr><th scope="col">Rater</th><th scope="col">Annotations</th><th scope="col">Gold accuracy</th><th scope="col">Status</th></tr></thead><tbody>
+{% for r in a.raters %}<tr><th scope="row">{{ r.name }}</th><td>{{ r.n }}</td>
+<td><progress value="{{ (r.gold_acc*100)|round|int }}" max="100" aria-label="Gold accuracy of {{ r.name }}"></progress>{{ '%.0f' % (r.gold_acc*100) }}% ({{ r.gold_n }} gold)</td>
+<td><span class="badge {{ 'b-bad' if r.flagged else 'b-ok' }}">{{ 'review' if r.flagged else 'ok' }}</span></td></tr>
+{% else %}<tr><td colspan="4" class="mut">No annotations yet.</td></tr>{% endfor %}</tbody></table></div>
+<h2>Pairwise agreement (κ)</h2>
+<div class="scroll" role="region" tabindex="0" aria-label="Pairwise agreement"><table><caption class="sr">Cohen's kappa for each rater pair</caption>
+<thead><tr><th scope="col">Rater A</th><th scope="col">Rater B</th><th scope="col">Shared tasks</th><th scope="col">κ</th></tr></thead><tbody>
+{% for k in a.kappas %}<tr><th scope="row">{{ k.a }}</th><td>{{ k.b }}</td><td>{{ k.n }}</td>
+<td><span class="badge {{ 'b-ok' if k.kappa>=0.6 else ('b-warn' if k.kappa>=0.4 else 'b-bad') }}">{{ '%.2f' % k.kappa }}</span></td></tr>
+{% else %}<tr><td colspan="4" class="mut">Not enough overlap yet.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

@@ -1,0 +1,16 @@
+[project]
+name = "evalforge"
+version = "0.1.0"
+description = "Human-in-the-loop LLM evaluation: blind pairwise annotation, structured issue tagging, rater quality control, Bradley-Terry leaderboards and DPO export."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "SriRam Kunamsetty", email = "mohansriramkunamsetty@gmail.com"}
+]
+license = {text = "MIT"}
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 110

@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block title %}Overview · EvalForge{% endblock %}{% block body %}
+<h1>Overview</h1><p class="sub">Blind pairwise human evaluation with per-rater position randomisation, gold-question QA, structured issue tagging and consensus-based preference export.</p>
+<div class="cards">
+<div class="card"><div class="l">Tasks</div><div class="n">{{ a.tasks|length }}</div></div>
+<div class="card"><div class="l">Annotations</div><div class="n">{{ a.n_ann }}</div></div>
+<div class="card"><div class="l">Raters</div><div class="n">{{ a.raters|length }}</div></div>
+<div class="card"><div class="l">Mean agreement (κ)</div><div class="n">{{ '%.2f' % a.mean_kappa if a.mean_kappa is not none else '–' }}</div></div></div>
+<h2>Leaderboard (consensus battles)</h2>
+<div class="scroll" role="region" tabindex="0" aria-label="Leaderboard preview"><table><caption class="sr">Models ranked by Bradley-Terry strength</caption>
+<thead><tr><th scope="col">#</th><th scope="col">Model</th><th scope="col">Elo-scale</th><th scope="col">Wins / battles</th></tr></thead><tbody>
+{% for m in a.board %}<tr><td>{{ loop.index }}</td><th scope="row">{{ m.model }}</th><td>{{ '%.0f' % m.elo }}</td><td>{{ m.wins }} / {{ m.battles }}</td></tr>
+{% else %}<tr><td colspan="4" class="mut">Needs tasks with at least 2 agreeing votes.</td></tr>{% endfor %}</tbody></table></div>
+<h2>Most reported issues</h2>
+<div class="scroll" role="region" tabindex="0" aria-label="Most reported issues"><table><caption class="sr">Issue tags reported by raters</caption>
+<thead><tr><th scope="col">Issue</th><th scope="col">Reports</th></tr></thead><tbody>
+{% for i in a.issues %}<tr><th scope="row">{{ i.label }}</th><td>{{ i.count }}</td></tr>
+{% else %}<tr><td colspan="2" class="mut">No issues tagged yet.</td></tr>{% endfor %}</tbody></table></div>
+<h2>Rater quality alerts</h2>
+<div class="scroll" role="region" tabindex="0" aria-label="Rater alerts"><table><caption class="sr">Raters flagged for review</caption>
+<thead><tr><th scope="col">Rater</th><th scope="col">Status</th><th scope="col">Gold accuracy</th></tr></thead><tbody>
+{% for r in a.raters if r.flagged %}<tr><th scope="row">{{ r.name }}</th><td><span class="badge b-bad">review</span></td><td>{{ '%.0f' % (r.gold_acc*100) }}% on {{ r.gold_n }} gold tasks</td></tr>
+{% else %}<tr><td colspan="3" class="mut">No flagged raters.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}
