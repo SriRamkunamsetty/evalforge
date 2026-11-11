@@ -43,7 +43,7 @@ jobs:
           for i in $(seq 1 20); do curl -fs localhost:8083/healthz && break || sleep 1; done
           curl -fsS localhost:8083/healthz
       - name: Scan Image for Vulnerabilities (Trivy)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: evalforge:ci
           severity: CRITICAL,HIGH
