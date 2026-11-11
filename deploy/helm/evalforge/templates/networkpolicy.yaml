@@ -1,0 +1,35 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: evalforge
+spec:
+  podSelector:
+    matchLabels:
+      app: evalforge
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow incoming HTTP traffic from Ingress controller and Prometheus
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8083
+  egress:
+    # Allow DNS lookup
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow outbound HTTPS for model APIs (OpenAI, Anthropic, Gemini)
+    - ports:
+        - protocol: TCP
+          port: 443
+{{- end }}

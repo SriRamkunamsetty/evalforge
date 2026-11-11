@@ -1,8 +1,15 @@
-"""EvalForge core: rater agreement, gold QA, consensus, Bradley-Terry ranking, DPO export."""
+"""EvalForge core: rater agreement, gold QA, consensus, Bradley-Terry ranking, DPO export, and ML algorithms."""
 from __future__ import annotations
 
 import hashlib
 import math
+
+# Expose advanced psychometric and ML capabilities from evalforge.ml
+from .ml.agreement import gwet_ac1, krippendorff_alpha, pairwise_agreement_matrix
+from .ml.bootstrap import bradley_terry_bootstrap, compute_win_probability_matrix
+from .ml.judge import HeuristicJudge, JudgeComparisonResult, LLMJudge, RubricScore, calibrate_judge_against_human
+from .ml.sampling import active_queue_prioritization, uncertainty_sampling
+from .ml.export import DatasetFormat, export_preference_dataset, validate_preference_pair
 
 
 def cohens_kappa(a: list, b: list) -> float:
@@ -77,3 +84,31 @@ def to_dpo(records: list[dict]) -> list[dict]:
             lo = "b" if r["winner"] == "a" else "a"
             out.append({"prompt": r["prompt"], "chosen": r[r["winner"]], "rejected": r[lo]})
     return out
+
+
+__all__ = [
+    "cohens_kappa",
+    "pairwise_kappas",
+    "gold_accuracy",
+    "flag_unreliable",
+    "consensus",
+    "swap_for",
+    "bradley_terry",
+    "elo_scale",
+    "to_dpo",
+    "krippendorff_alpha",
+    "gwet_ac1",
+    "pairwise_agreement_matrix",
+    "bradley_terry_bootstrap",
+    "compute_win_probability_matrix",
+    "LLMJudge",
+    "HeuristicJudge",
+    "RubricScore",
+    "JudgeComparisonResult",
+    "calibrate_judge_against_human",
+    "uncertainty_sampling",
+    "active_queue_prioritization",
+    "export_preference_dataset",
+    "DatasetFormat",
+    "validate_preference_pair",
+]

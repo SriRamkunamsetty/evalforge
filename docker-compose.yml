@@ -1,15 +1,76 @@
 services:
-  evalforge:
+  evalforge-web:
     build: .
-    ports: ["8083:8083"]
+    ports:
+      - "8083:8083"
     environment:
-      API_KEY: ${API_KEY:?set API_KEY in .env}
-      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+      API_KEY: ${API_KEY:-dev-api-key-evalforge-supercharged}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-evalforge-supercharged}
       COOKIE_SECURE: "0"
-    volumes: ["data:/data"]
+      RATE_LIMIT_PER_MIN: "300"
+      DATA_DIR: "/data"
+    volumes:
+      - data:/data
     read_only: true
-    tmpfs: ["/tmp", "/dev/shm"]
-    cap_drop: [ALL]
-    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp
+      - /dev/shm
+    cap_drop:
+      - ALL
+    security_opt:
+      - "no-new-privileges:true"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8083/healthz')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  evalforge-worker:
+    build: .
+    command: ["python", "-m", "evalforge.worker"]
+    environment:
+      API_KEY: ${API_KEY:-dev-api-key-evalforge-supercharged}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-evalforge-supercharged}
+      DATA_DIR: "/data"
+    volumes:
+      - data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /dev/shm
+    cap_drop:
+      - ALL
+    security_opt:
+      - "no-new-privileges:true"
+    depends_on:
+      evalforge-web:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:v2.50.0
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
 volumes:
   data: {}
+  prometheus-data: {}
+  grafana-data: {}

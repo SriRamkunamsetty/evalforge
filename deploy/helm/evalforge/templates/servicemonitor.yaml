@@ -1,0 +1,44 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: evalforge
+spec:
+  selector:
+    matchLabels:
+      app: evalforge
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-alerts
+  labels:
+    app: evalforge
+spec:
+  groups:
+    - name: evalforge.alerts
+      rules:
+        - alert: EvalForgeLowInterRaterAgreement
+          expr: evalforge_krippendorff_alpha < 0.40
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Low Inter-Annotator Agreement Detected (α < 0.40)"
+            description: "Krippendorff's alpha has fallen to {{ $value }}. Review annotation rubrics and task clarity."
+        - alert: EvalForgeHighFlaggedRaters
+          expr: evalforge_flagged_raters > 2
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Multiple Raters Flagged for Poor Gold Accuracy"
+            description: "{{ $value }} raters currently fail quality assurance controls."
+{{- end }}

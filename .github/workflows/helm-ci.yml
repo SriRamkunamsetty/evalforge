@@ -1,0 +1,39 @@
+name: helm-ci
+
+on:
+  push:
+    paths:
+      - "deploy/helm/**"
+      - ".github/workflows/helm-ci.yml"
+  pull_request:
+    paths:
+      - "deploy/helm/**"
+      - ".github/workflows/helm-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
+
+      - name: Run linting
+        run: helm lint deploy/helm/evalforge --strict
+
+      - name: Validate rendered templates
+        run: |
+          helm template evalforge deploy/helm/evalforge > /tmp/rendered.yaml
+          cat /tmp/rendered.yaml | grep -E "kind: (Deployment|Service|Ingress|HorizontalPodAutoscaler|NetworkPolicy)"
