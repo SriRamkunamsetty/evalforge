@@ -28,7 +28,7 @@ jobs:
           python-version: "3.12"
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.6.1
+        uses: helm/chart-testing-action@v2.9.0
 
       - name: Run linting
         run: helm lint deploy/helm/evalforge --strict
