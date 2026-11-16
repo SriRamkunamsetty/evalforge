@@ -1,5 +1,5 @@
 # Build Stage: Compile and prepare wheels
-FROM python:3.12-slim AS builder
+FROM python:3.15-slim AS builder
 
 WORKDIR /build
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
@@ -13,7 +13,7 @@ COPY requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /build/wheels -r requirements.txt
 
 # Final Runtime Stage: Minimal, hardened, non-root container
-FROM python:3.12-slim AS runtime
+FROM python:3.15-slim AS runtime
 
 LABEL org.opencontainers.image.title="EvalForge" \
       org.opencontainers.image.description="Enterprise Human-in-the-Loop & LLM-as-a-Judge Evaluation Platform" \
